@@ -1,0 +1,60 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/osgi-compendium http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+">
+
+	<osgix:cm-properties id="primeProps" persistent-id="com.cisco.prime.esb.ana">
+
+		<prop key="anaComURI"></prop>
+		<prop key="anaPtpServer"></prop>
+
+		<!-- properties below here are private -->
+		<prop key="anaPtpUser"></prop>
+		<prop key="anaPtpPw"></prop>
+		<prop key="pingTimeout">4000</prop>
+	</osgix:cm-properties>
+
+	<bean id="pgwInvCollectorBean"
+		class="com.samples.spring.Inventory.PGWLogicalInventoryDataCollector" />
+	<bean id="sgwInvCollectorBean"
+		class="com.samples.spring.Inventory.SGWLogicalInventoryDataCollector" />
+	<bean id="saegwInvCollectorBean"
+		class="com.samples.spring.Inventory.SAEGWLogicalInventoryDataCollector" />
+
+	<bean id="phyInventoryCollectorBean"
+		class="com.samples.spring.Inventory.PhysicalInvenrtoryDataCollector" />
+
+	<bean id="logicalInventoryCollectorBean"
+		class="com.samples.spring.Inventory.LogicalInventoryDataCollector">
+		<property name="collectors">
+			<list>
+				<ref bean="pgwInvCollectorBean" />
+				<ref bean="sgwInvCollectorBean" />
+				<ref bean="saegwInvCollectorBean" />
+			</list>
+		</property>
+		<property name="routeBean" ref="anaRoute" />
+	</bean>
+
+
+	<bean id="invDataCollectorBean" class="com.samples.spring.Inventory.Bean.DataCollectorBean"
+		scope="singleton">
+		<property name="collectors">
+			<list>
+				<ref bean="phyInventoryCollectorBean" />
+				<ref bean="logicalInventoryCollectorBean" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="anaRoute" class="com.samples.spring.Inventory.Bean.RouteBean">
+		<property name="user" value="${anaPtpUser}" />
+		<property name="password" value="${anaPtpPw}" />
+		<property name="hostname" value="${anaPtpServer}" />
+		<property name="comURI" value="${anaComURI}" />
+	</bean>
+</beans>
